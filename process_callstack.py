@@ -27,7 +27,7 @@ def process_pc_trace(executable_files, pc_trace_file, output_file):
     output_list = []
     with open(pc_trace_file, 'r') as trace_file:
         for line in trace_file:
-            match = re.search(r'Cycle (\d+).*Pc\[(\w+)\]', line)
+            match = re.search(r'Cycle\s+(\d+).*Pc\[(\w+)\]', line)
             if match:
                 cycle = match.group(1)
                 pc = match.group(2)
