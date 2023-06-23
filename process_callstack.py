@@ -1,4 +1,5 @@
 import argparse
+import re
 import subprocess
 
 def get_symbol_table(executable_file):
@@ -26,20 +27,22 @@ def process_pc_trace(executable_files, pc_trace_file, output_file):
     output_list = []
     with open(pc_trace_file, 'r') as trace_file:
         for line in trace_file:
-            pc = line.strip()
-            if pc.startswith('Pc['):
-                pc_address = int(pc[3:-1], 16)
+            match = re.search(r'Cycle (\d+).*Pc\[(\w+)\]', line)
+            if match:
+                cycle = match.group(1)
+                pc = match.group(2)
+                pc_address = int(pc, 16)
                 for file, symbol_table in all_symbol_tables.items():
                     if pc_address in symbol_table:
                         symbol = symbol_table[pc_address]
-                        output_list.append((pc, file, symbol))
+                        output_list.append((cycle, pc, file, symbol))
                         break
 
     # Save the output list to a file
     with open(output_file, 'w') as output:
         for item in output_list:
-            pc, file, symbol = item
-            output.write(f"PC: {pc}, File: {file}, Symbol: {symbol}\n")
+            cycle, pc, file, symbol = item
+            output.write(f"Cycle: {cycle}, PC: {pc}, File: {file}, Symbol: {symbol}\n")
 
 def main():
     parser = argparse.ArgumentParser(description='Get symbol table from executable files')
