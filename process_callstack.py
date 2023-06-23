@@ -22,7 +22,7 @@ def get_symbol_table(executable_file):
 def build_call_stack(address, symbol_table, call_stack):
     if address in symbol_table:
         symbol = symbol_table[address]
-        call_stack.append(symbol)
+        call_stack.append(symbol['name'])
         if symbol['type'] == 'T':  # Function symbol
             target_address = int(symbol['name'].split()[-1], 16)
             build_call_stack(target_address, symbol_table, call_stack)
@@ -54,7 +54,7 @@ def process_pc_trace(executable_files, pc_trace_file, output_file):
         for file, call_stack in call_stacks:
             output.write(f"File: {file}\n")
             for symbol in call_stack:
-                output.write(f"- {symbol['name']}\n")
+                output.write(f"- {symbol}\n")
             output.write("\n")
 
 def main():
