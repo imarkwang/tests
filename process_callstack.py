@@ -44,8 +44,8 @@ def process_pc_trace(executable_files, pc_trace_file, output_file):
 def main():
     parser = argparse.ArgumentParser(description='Get symbol table from executable files')
     parser.add_argument('executable_files', nargs='+', help='List of executable files to get symbol table from')
-    parser.add_argument('pc_trace_file', help='File containing PC value trace of an executable file')
-    parser.add_argument('output_file', help='Output file')
+    parser.add_argument('-t', '--trace-file', dest='pc_trace_file', help='File containing PC value trace of an executable file')
+    parser.add_argument('-o', '--output-file', dest='output_file', help='Output file')
     args = parser.parse_args()
 
     process_pc_trace(args.executable_files, args.pc_trace_file, args.output_file)
