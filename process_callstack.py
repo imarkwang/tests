@@ -10,11 +10,22 @@ def get_symbol_table(executable_file):
             parts = line.split()
             if len(parts) >= 3:
                 address, symbol_type, *symbol_name = parts
-                symbol_table[int(address, 16)] = ' '.join(symbol_name)
+                symbol_table[int(address, 16)] = {
+                    'name': ' '.join(symbol_name),
+                    'type': symbol_type
+                }
         return symbol_table
     except subprocess.CalledProcessError:
         print(f"Unable to get symbol table for {executable_file}")
         return {}
+
+def build_call_stack(address, symbol_table, call_stack):
+    if address in symbol_table:
+        symbol = symbol_table[address]
+        call_stack.append(symbol)
+        if symbol['type'] == 'T':  # Function symbol
+            target_address = int(symbol['name'].split()[-1], 16)
+            build_call_stack(target_address, symbol_table, call_stack)
 
 def process_pc_trace(executable_files, pc_trace_file, output_file):
     # Get all symbol tables
@@ -23,26 +34,28 @@ def process_pc_trace(executable_files, pc_trace_file, output_file):
         symbol_table = get_symbol_table(file)
         all_symbol_tables[file] = symbol_table
 
-    # Read the PC trace file and index the symbol tables
-    output_list = []
+    # Read the PC trace file and build call stacks
+    call_stacks = []
     with open(pc_trace_file, 'r') as trace_file:
         for line in trace_file:
-            match = re.search(r'Cycle\s+(\d+).*Pc\[(\w+)\]', line)
+            match = re.search(r'Pc\[(\w+)\]', line)
             if match:
-                cycle = match.group(1)
-                pc = match.group(2)
+                pc = match.group(1)
                 pc_address = int(pc, 16)
                 for file, symbol_table in all_symbol_tables.items():
                     if pc_address in symbol_table:
-                        symbol = symbol_table[pc_address]
-                        output_list.append((cycle, pc, file, symbol))
+                        call_stack = []
+                        build_call_stack(pc_address, symbol_table, call_stack)
+                        call_stacks.append((file, call_stack))
                         break
 
-    # Save the output list to a file
+    # Save the call stacks to the output file
     with open(output_file, 'w') as output:
-        for item in output_list:
-            cycle, pc, file, symbol = item
-            output.write(f"Cycle: {cycle}, PC: {pc}, File: {file}, Symbol: {symbol}\n")
+        for file, call_stack in call_stacks:
+            output.write(f"File: {file}\n")
+            for symbol in call_stack:
+                output.write(f"- {symbol['name']}\n")
+            output.write("\n")
 
 def main():
     parser = argparse.ArgumentParser(description='Get symbol table from executable files')
