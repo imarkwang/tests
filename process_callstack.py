@@ -8,8 +8,8 @@ def get_symbol_table(executable_file):
         for line in result.decode('utf-8').splitlines():
             parts = line.split()
             if len(parts) >= 3:
-                address, symbol_type, symbol_name = parts
-                symbol_table[int(address, 16)] = symbol_name
+                address, symbol_type, *symbol_name = parts
+                symbol_table[int(address, 16)] = ' '.join(symbol_name)
         return symbol_table
     except subprocess.CalledProcessError:
         print(f"Unable to get symbol table for {executable_file}")
