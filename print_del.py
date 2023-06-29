@@ -42,7 +42,7 @@ def extract_pc_from_line(line):
     if match:
         return match.group(1)
     else:
-        raise ValueError('Invalid line format: ' + line.strip())
+        return None
 
 def main():
     parser = argparse.ArgumentParser(description='Delete lines between start PC and end PC in a file')
