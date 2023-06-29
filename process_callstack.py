@@ -35,7 +35,7 @@ def process_pc_trace(executable_files, pc_trace_file, output_file):
                 # Modify the PC address if it starts with 0xffffffc00
                 pc_address = int(pc, 16)
                 if pc_address & 0xfffffffff0000000 == 0xffffffc000000000:
-                    pc_address = (pc_address & 0xfffffffffff) | 0x8000000000000000
+                    pc_address = (pc_address & 0xffffffff) | 0x80000000
 
                 for file, symbol_table in all_symbol_tables.items():
                     if pc_address in symbol_table:
