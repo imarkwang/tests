@@ -1,4 +1,5 @@
 import argparse
+import re
 
 def delete_lines_between_pcs(file_path, start_pc, end_pc):
     start_pc_found = False
@@ -10,7 +11,7 @@ def delete_lines_between_pcs(file_path, start_pc, end_pc):
 
     new_lines = []
     for line in lines:
-        pc = line.strip()  # 假设每一行只包含一个 PC 值
+        pc = extract_pc_from_line(line)
 
         if pc == start_pc:
             if start_pc_found:
@@ -34,6 +35,14 @@ def delete_lines_between_pcs(file_path, start_pc, end_pc):
     # 写入修改后的内容到文件
     with open(file_path, 'w') as file:
         file.writelines(new_lines)
+
+def extract_pc_from_line(line):
+    pattern = r'\[0x([\da-fA-F]+)\]'
+    match = re.search(pattern, line)
+    if match:
+        return match.group(1)
+    else:
+        raise ValueError('Invalid line format: ' + line.strip())
 
 def main():
     parser = argparse.ArgumentParser(description='Delete lines between start PC and end PC in a file')
