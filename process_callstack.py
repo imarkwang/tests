@@ -31,7 +31,12 @@ def process_pc_trace(executable_files, pc_trace_file, output_file):
             if match:
                 cycle = match.group(1)
                 pc = match.group(2)
+
+                # Modify the PC address if it starts with 0xffffffc00
                 pc_address = int(pc, 16)
+                if pc_address & 0xfffffffff0000000 == 0xffffffc000000000:
+                    pc_address = (pc_address & 0xfffffffffff) | 0x8000000000000000
+
                 for file, symbol_table in all_symbol_tables.items():
                     if pc_address in symbol_table:
                         symbol = symbol_table[pc_address]
@@ -43,6 +48,7 @@ def process_pc_trace(executable_files, pc_trace_file, output_file):
         for item in output_list:
             cycle, pc, file, symbol = item
             output.write(f"Cycle: {cycle}, PC: {pc}, File: {file}, Symbol: {symbol}\n")
+
 
 def main():
     parser = argparse.ArgumentParser(description='Get symbol table from executable files')
