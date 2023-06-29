@@ -18,12 +18,14 @@ def delete_lines_between_pcs(file_path, start_pc, end_pc):
                 raise ValueError('Multiple start PCs detected.')
             start_pc_found = True
             start_pc_count += 1
+            new_lines.append(line)
             continue
 
         if pc == end_pc:
             if not start_pc_found:
                 raise ValueError('No start PC detected before end PC.')
             start_pc_found = False
+            new_lines.append(line)
             continue
 
         if not start_pc_found:
